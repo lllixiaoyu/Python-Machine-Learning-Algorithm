@@ -36,6 +36,46 @@ def load_data_libsvm(data_file):
     f.close()
     return np.mat(data), np.mat(label).T
 
+def cal_accuracy(svm, test_x, test_y):
+	'''计算预测的准确性
+	input:svm : SVM 模型
+		test_x(mat):测试的特征
+		test_y(mat):测试的标签
+	output:accuacy(float):预测的准确性
+	'''
+	n_samples = np.shape(test_x)[0]
+	correct = 0.0
+	for i in range(n_samples):
+		#对每一个样本得到预测值
+		predict = svm_predict(svm, test_x[i, :])
+		#判断每一个样本值的预测值与真实值是否一样
+		if np.sign(predict) == np.sign(test_y[1]):
+			correct += 1
+	accuracy = correct / n_samples
+	return  accuracy
+
+def svm_predict(svm, test_sample_x):
+	'''利用SVM模型对每一个样本进行预测
+	input:svm:SVM模型
+		test_sample_x(mat):样本
+	output:predict(float)：对样本的预测
+	'''
+	#计算核函数矩阵
+	kernel_value = svm.cal_kernel_value(svm.train_x, test_sample_x, svm.kernel_opt)
+	#计算预测值
+	predict = kernel_value.T * np.multiply(svm.train_y, svm.alphas) + svm.b
+	return predict
+
+
+def save_svm_model(svm_model, model_file):
+	'''
+	保存svm模型
+	input:param svm_model: SVM模型
+	:param model_file: SVM模型需要保存的文件
+	'''
+	with open(model_file, 'w') as f :
+		pickle.dump(svm.model, f)
+
 if __name__ == "__main__":
     # 1、导入训练数据
     print "------------ 1、load data --------------"
